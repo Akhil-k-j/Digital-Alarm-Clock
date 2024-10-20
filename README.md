@@ -1,4 +1,4 @@
-# Digital-Clock
+# Digital-Alarm-Clock
 
 Includes auto-reading and auto-saving settings, easy seek navigation, leap year/month detection, and 12-hour format recovery. Supports a wide range of years (2000-2100) and features a customizable alarm function for precise time management. Enjoy seamless and user-friendly timekeeping with advanced alarm capabilities!
 
