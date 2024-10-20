@@ -4,6 +4,8 @@ Includes auto-reading and auto-saving settings, easy seek navigation, leap year/
 
 Features:-
 
+Alarm setting mode.
+
 Auto reads current paramenter during the setting mode, Making user friendly to change parameters.
 
 Auto save on every paramater setting update.
