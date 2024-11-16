@@ -21,3 +21,4 @@ Can recover RTC With 12Hr format.
 
 Wide range of year selection (2000-2100).
 
+FYI: All the parameters in DS1307 are in BCD form. However, I followed BCD only for HH, MM and SS.(hour, minute, and seconds).
