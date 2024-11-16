@@ -1,0 +1,283 @@
+#include"header.h"
+extern int flag;
+extern int flag1;
+extern int flag2;
+
+
+extern int alarm_flag;
+//int AHH,AMM,ASS;
+
+void set_alarm(void)
+{
+        flag2=0;
+        alarm_setting_mode();
+        if(flag2==1)
+        flag2=0;
+}
+
+void alarm_setting_mode(void)
+{
+        char *AMPM[]={"AM","PM"};
+        int HH=1,MM,SS,am_pm,data,h;
+        int AHH,AMM,ASS,AAMPM;
+//      int date,month,year,day;
+
+        flag=flag1=flag2=0;
+        lcd_cmd(0x01);
+        lcd_string("Alarm Mode");
+        delay_s(1);
+        lcd_cmd(0x01);
+        L1:
+        h=i2c_byte_read_frame(0xD0,0x2);
+        HH=(h&0x1F);
+        HH=((HH/16)*10)+(HH%16);
+        lcd_cmd(0x01);
+        while(1)
+        {
+                        if(flag==1)
+                        {
+                                AHH=HH;
+                                flag=0;
+                                return ;
+                        }
+                        if(flag1==1)
+                        {
+                                flag1=0;
+                                if(press_count()==1)
+                                {
+                                HH++;
+                                if(HH==13)
+                                HH=1;
+                                }
+                                else
+                                {
+                                HH--;
+                                if(HH==0)
+                                HH=12;
+                                }
+                                flag1=0;
+                        }
+                        if(flag2==1)
+                        {
+                                if(press_count()==1)
+                                {
+                                AHH=HH;
+                                flag2=0;
+                                break;
+                                }
+                                else
+                                {
+                                AHH=HH;
+                                flag2=0;
+                                goto L4;
+                                }
+                        }
+                        lcd_cmd(0x80);
+                        lcd_string("Enter Hour:");
+                        lcd_cmd(0xC0);
+                        lcd_integer(HH/10);
+                        lcd_integer(HH%10);
+        }
+        L2:
+        MM=i2c_byte_read_frame(0xD0,0x1);
+        MM=((MM/16)*10)+(MM%16);
+        lcd_cmd(0x01);
+        while(1)
+        {
+                        if(flag==1)
+                        {
+                                AMM=MM;
+                                flag=0;
+                                return ;
+                        }
+                        if(flag1==1)
+                        {
+                                if(press_count()==1)
+                                {
+                                MM++;
+                                if(MM==60)
+                                MM=0;
+                                }
+                                else
+                                {
+                                MM--;
+                                if(MM==-1)
+                                MM=59;
+                                }
+                                flag1=0;
+                        }
+                        if(flag2==1)
+                        {
+                                if(press_count()==1)
+                                {
+                                AMM=MM;
+                                        flag2=0;
+                                        break;
+                                }
+                                else
+                                {
+                                AMM=MM;
+                                flag2=0;
+                                goto L1;
+                                }
+                        }
+                        lcd_cmd(0x80);
+                        lcd_string("Enter minutes:");
+                        lcd_cmd(0xC0);
+                        lcd_integer(MM/10);
+                        lcd_integer(MM%10);
+        }
+        L3:
+        SS=i2c_byte_read_frame(0xD0,0x0);
+        SS=((SS/16)*10)+(SS%16);
+        lcd_cmd(0x01);
+        while(1)
+        {
+                        if(flag==1)
+                        {
+                                ASS=SS;
+                                flag=0;
+                                return ;
+                        }
+                        if(flag1==1)
+                        {
+                                if(press_count()==1)
+                                {
+                                SS++;
+                                if(SS==60)
+                                SS=0;
+                                }
+                                else
+                                {
+                                SS--;
+                                if(SS==-1)
+                                SS=59;
+                                }
+                                flag1=0;
+                        }
+                        if(flag2==1)
+                        {
+                                if(press_count()==1)
+                                {
+                                ASS=SS;
+                                flag2=0;
+                                break;
+                                }
+                                        else
+                                        {
+                                        ASS=SS;
+                                        flag2=0;
+                                        goto L2;
+                                        }
+                        }
+                        lcd_cmd(0x80);
+                        lcd_string("Enter seconds:");
+                        lcd_cmd(0xC0);
+                        lcd_integer(SS/10);
+                        lcd_integer(SS%10);
+        }
+        L4:
+        am_pm=i2c_byte_read_frame(0xD0,0x2);
+        data=(am_pm>>5)&1;
+        lcd_cmd(0x01);
+        while(1)
+        {
+                        if(flag==1)
+                        {
+                                        AAMPM=data;
+                                        if(data)
+                                        am_pm=(am_pm|(1<<5));
+                                        else
+                                        am_pm=((~(1<<5))& am_pm);
+        //                      i2c_byte_write_frame(0xD0,0x2,am_pm);   //setting minutes
+                                flag=0;
+                                return ;
+                        }
+                        if(flag1==1)               //toggle button flag, since am and pm need to keep on toggle
+                        {
+                                if(data)
+                                data=0;
+                                else
+                                data=1;
+                                flag1=0;
+                        }
+                        if(flag2==1)
+                        {
+                                if(press_count()==1)
+                                {
+                                        AAMPM=data;
+                                        if(data)
+                                        am_pm=(am_pm|(1<<5));
+                                        else
+                                        am_pm=((~(1<<5))& am_pm);
+        //                              i2c_byte_write_frame(0xD0,0x2,am_pm);   //setting minutes
+                                        flag2=0;
+                                        break;
+                                }
+                                else
+                                {
+                                        AAMPM=data;
+                                        if(data)
+                                        am_pm=(am_pm|(1<<5));
+                                        else
+                                        am_pm=((~(1<<5))& am_pm);
+                //                      i2c_byte_write_frame(0xD0,0x2,am_pm);   //setting minutes
+                                        flag2=0;
+                                        goto L3;
+                                }
+                        }
+                        lcd_cmd(0x80);
+                        lcd_string("AM/PM:");
+                        lcd_cmd(0xC0);
+                        lcd_string(AMPM[data]);
+        }
+         // Following code is for debug purpose only
+         // Take acount of the delay which adds. It will affect the actaul alarm to trigger
+
+   /* uart0_tx_string("Before HH:");
+  uart0_tx_integer(AHH);
+   uart0_tx_string("\r\n");             */
+  i2c_byte_write_frame(0xD0,0x08,AHH);
+   /* uart0_tx_string("After HH:");
+  uart0_tx_integer(i2c_byte_read_frame(0xD0,0x08));
+     uart0_tx_string("\r\n");   */
+   // delay_s(2);
+
+
+     /*  uart0_tx_string("Before MM:");
+  uart0_tx_integer(AMM);
+     uart0_tx_string("\r\n");                      */
+          i2c_byte_write_frame(0xD0,0x09,AMM);
+   /* uart0_tx_string("After MM:");
+  uart0_tx_integer(i2c_byte_read_frame(0xD0,0x09));
+     uart0_tx_string("\r\n");
+    delay_s(2);         */
+
+
+
+    /*    uart0_tx_string("Before SS:");
+  uart0_tx_integer(ASS);
+     uart0_tx_string("\r\n");  */
+  i2c_byte_write_frame(0xD0,0x0A,ASS);
+   /* uart0_tx_string("After SS:");
+  uart0_tx_integer(i2c_byte_read_frame(0xD0,0x0A));
+     uart0_tx_string("\r\n");
+    delay_s(2);  */
+
+
+    /*    uart0_tx_string("Before AAMPM:");
+  uart0_tx_integer(AAMPM);
+     uart0_tx_string("\r\n");    */
+  i2c_byte_write_frame(0xD0,0x0B,AAMPM);
+  /*  uart0_tx_string("After AAMPM:");
+  uart0_tx_integer(i2c_byte_read_frame(0xD0,0x0B));
+     uart0_tx_string("\r\n");
+    delay_s(2);   */
+
+        alarm_flag=1;
+
+        lcd_cmd(0x01);
+        lcd_string("Alarm Success");
+        delay_s(1);
+        lcd_cmd(0x01);
+}                                                                                                    
